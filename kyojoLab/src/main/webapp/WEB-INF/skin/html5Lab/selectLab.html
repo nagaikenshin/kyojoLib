@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8" />
+  <title>Select Laboratory</title>
+  <link rel="stylesheet" href="__BASE_URI__/css/kyojoLab.css" />
+ </head>
+ <body>
+  #nav(__SID__,__ACT__)
+  <h1>Select Laboratory</h1>
+  <form id="f" method="post">
+   #html5/selectNormal{"label":"Hour(24-hour clock)","attrs":{"id":"hour24"}}
+   #html5/selectNormal{"label":"Hour(a.m./p.m.)","attrs":{"id":"hourAmPm"}}
+   #html5/selectNormal{"label":"Prefectures","attrs":{"id":"prefectures","size":"5","multiple":"multiple"}}
+   #html5/inputSubmitNormal{"attrs":{"id":"doSelect","value":"Submit"}}
+  </form>
+  #kyojoLab/githubRibbon
+  <div><a href="__BASE_URI__/html5Lab/index.html">Exit</a></div>
+ </body>
+</html>

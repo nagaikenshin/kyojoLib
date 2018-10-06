@@ -1,0 +1,54 @@
+@charset "utf-8";
+
+fieldset.inputRadioNormal {
+	margin: 0;
+	padding: 0;
+	border: none;
+}
+
+fieldset.inputRadioNormal legend {
+	display: inline;
+	margin: 0;
+	padding: 0;
+	float: left;
+}
+
+fieldset.inputRadioNormal ul {
+	display: inline;
+	margin: 0;
+	padding: 0;
+}
+
+li.inputRadioNormal {
+	display: inline;
+	list-style: none;
+}
+
+fieldset.inputCheckboxNormal {
+	margin: 0;
+	padding: 0;
+	border: none;
+}
+
+fieldset.inputCheckboxNormal legend {
+	display: inline;
+	margin: 0;
+	padding: 0;
+	float: left;
+}
+
+fieldset.inputCheckboxNormal ul {
+	display: inline;
+	margin: 0;
+	padding: 0;
+}
+
+li.inputCheckboxNormal {
+	display: inline;
+	list-style: none;
+}
+
+small.vldMsg {
+	color: red;
+}
+

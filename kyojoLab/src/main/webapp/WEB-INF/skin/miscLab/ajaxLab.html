@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8" />
+  <title>Ajax Laboratory</title>
+  <link rel="stylesheet" href="__BASE_URI__/css/kyojoLab.css" />
+ </head>
+ <body>
+  #nav(__SID__,__ACT__)
+  <h1>Ajax Laboratory</h1>
+  <form id="f" method="post">
+
+   <h2>Travel Items</h2>
+   <ul id="travelItemUl">
+    <li>#miscLab/ajaxLab/travelItemLi(__TRAVEL_ITEM_LIST__MINION__)</li>
+   </ul>
+   <div class="addNewDiv">
+    <input id="addNewName" type="text" />
+    <button id="addNewBtn" type="button" onclick="addNewTravelItem();">Add New</button>
+   </div>
+
+   <input id="baseURI" type="hidden" value="__BASE_URI__" />
+  </form>
+  #kyojoLab/githubRibbon
+  <div><a href="__BASE_URI__/miscLab/index.html">Exit</a></div>
+
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+    integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+    crossorigin="anonymous"></script>
+  <script src="__BASE_URI__/js/ajaxLab.js"></script>
+ </body>
+</html>

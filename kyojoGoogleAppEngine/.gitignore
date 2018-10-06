@@ -1,0 +1,9 @@
+*.class
+*.DS_Store
+/memo.txt
+/.apt_generated/
+/.gradle/
+/bin/
+/build/
+/target/
+/work/

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8" />
+  <title>Generic HTML Laboratory</title>
+  <link rel="stylesheet" href="__BASE_URI__/css/kyojoLab.css" />
+  <style>
+   div {
+    margin: 0 0 5px 0;
+    padding: 5px;
+    border: solid blue 1px;
+   }
+   .red {
+    padding: 5px;
+    background-color: #f77;
+    border: solid red 1px;
+   }
+   .green {
+    padding: 5px;
+    background-color: #7f7;
+    border: solid green 1px;
+   }
+   .blue {
+    padding: 5px;
+    background-color: #77f;
+    border: solid blue 1px;
+   }
+  </style>
+ </head>
+ <body>
+  #nav(__SID__,__ACT__)
+  <h1>Generic HTML Laboratory</h1>
+  <form id="f" method="post">
+   #html5/genericHtmlElement(__DIV1__MINION__)
+   #html5/textAreaNormal{"label":"JSON","attrs":{"id":"div1.minion","cols"="40","rows"="10"}}
+   <div>
+    1st span class attched
+    <ul>
+     <li>#html5/inputRadioNormal{"label":"Red","attrs":{"id":"span3Class.red"}}</li>
+     <li>#html5/inputRadioNormal{"label":"Green","attrs":{"id":"span3Class.green"}}</li>
+     <li>#html5/inputRadioNormal{"label":"Blue","attrs":{"id":"span3Class.blue"}}</li>
+    </ul>
+   </div>
+   #kyojoLab/githubRibbon
+   #html5/inputSubmitNormal{"attrs":{"id":"doSubmit","value":"submit"}}
+   <a href="__BASE_URI__/html5Lab/index.html">Exit</a>
+  </form>
+  <script>
+   var div1TextArea = document.getElementById("div1.minion");
+   div1TextArea.value = JSON.stringify(JSON.parse(div1TextArea.value), undefined, "    ");
+  </script>
+ </body>
+</html>

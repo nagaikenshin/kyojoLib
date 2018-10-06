@@ -1,0 +1,19 @@
+apply plugin: 'java-library'
+apply plugin: 'maven'
+
+dependencies {
+	implementation 'org.kyojo:kyojo-core:0.6.0'
+	implementation 'com.google.appengine:appengine-api-1.0-sdk:1.9.64'
+	implementation 'com.google.appengine.tools:appengine-gcs-client:0.8'
+}
+
+archivesBaseName = 'kyojo-googleAppEngine'
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier = 'sources'
+	from sourceSets.main.allSource
+}
+
+artifacts {
+	archives sourcesJar
+}

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8" />
+  <title>Checkout result</title>
+ </head>
+ <body>
+  <h1>Checkout result</h1>
+  <form id="f" method="post">
+   #html5/textAreaNormal{"label":"CartBlock JSON","attrs":{"id":"cartBlock.minion","cols"="40","rows"="10"}}
+   #html5/textAreaNormal{"label":"BillingAddress JSON","attrs":{"id":"billingAddress.minion","cols"="40","rows"="10"}}
+   <a href="__BASE_URI__/bs4Lab/checkoutLab.html">Back</a>
+  </form>
+  <script>
+   var cartBlockTextArea = document.getElementById("cartBlock.minion");
+   cartBlockTextArea.value = JSON.stringify(JSON.parse(cartBlockTextArea.value), undefined, "    ");
+   var billingAddressTextArea = document.getElementById("billingAddress.minion");
+   billingAddressTextArea.value = JSON.stringify(JSON.parse(billingAddressTextArea.value), undefined, "    ");
+  </script>
+ </body>
+</html>

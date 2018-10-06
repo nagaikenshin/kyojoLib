@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8" />
+  <title>Validation Laboratory</title>
+  <link rel="stylesheet" href="__BASE_URI__/css/html5.css" />
+  <link rel="stylesheet" href="__BASE_URI__/css/kyojoLab.css" />
+ </head>
+ <body>
+  #nav(__SID__,__ACT__)
+  <h1>Validation Laboratory</h1>
+  <form id="f" method="post">
+   #html5/inputTextNormal{"label":"E-mail","attrs":{"id":"email"}}
+   #html5/inputTextNormal{"label":"Integer","attrs":{"id":"ival"},"desc":"@Min(-10)"}
+   #html5/inputTextNormal{"label":"Date","attrs":{"id":"past"},"desc":"@Past \"2000-01-01\""}
+   <table>
+    <thead>
+     <tr>
+      <th>No</th>
+      <th>Name</th>
+      <th>Age</th>
+     </tr>
+    </thead>
+    <tbody>
+     <tr><td>#miscLab/validationLab/person(__PERSON_LIST__MINION__)</td></tr>
+    </tbody>
+   </table>
+   <button type="submit" name="doSubmit">Submit</button>
+  </form>
+  #kyojoLab/githubRibbon
+  <div><a href="__BASE_URI__/miscLab/index.html">Exit</a></div>
+ </body>
+</html>

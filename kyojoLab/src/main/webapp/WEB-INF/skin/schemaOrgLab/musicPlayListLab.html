@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8" />
+  <title>MusicPlaylist Laboratory</title>
+  <link rel="stylesheet" href="__BASE_URI__/css/kyojoLab.css" />
+  <script>#breadcrumbScript(__SID__,__ACT__)</script>
+ </head>
+ <body>
+  #nav(__SID__,__ACT__)
+  <h1>MusicPlaylist Laboratory</h1>
+  <form id="f" method="post">
+   <a href="http://schema.org/MusicPlaylist">MusicPlaylist</a>
+   <div>
+    #html5/inputTextNormal{"label":"name(DataType.Text)","attrs":{"id":"musicPlaylist.name.text","placeholder":"abc"}}
+   </div>
+   <div>
+    #html5/inputTextNormal{"label":"numTracks(Class.Integer)","attrs":{"id":"musicPlaylist.numTracks.integer","placeholder":"123"}}
+   </div>
+   <div>
+    #html5/inputTextNormal{"label":"dateCreated(DataType.DateTime)","attrs":{"id":"musicPlaylist.dateCreated.dateTime","placeholder":"2000-01-01 12:34:56"}}
+   </div>
+   <div>
+    #html5/inputTextNormal{"label":"datePublished(DataType.Date)","attrs":{"id":"musicPlaylist.datePublished.date","placeholder":"2000-01-01"}}
+   </div>
+   <div>
+    #html5/inputTextNormal{"label":"version(DataType.Number)","attrs":{"id":"musicPlaylist.version.number","placeholder":"1.00"}}
+   </div>
+   <div>
+    #html5/inputTextNormal{"label":"license(Class.URL)","attrs":{"id":"musicPlaylist.license.url","placeholder":"http://www.example.com/"}}
+   </div>
+   <div>
+    <div>gender(Class.GenderType.String)</div>
+    #html5/inputRadioNormal{"label":"未回答","attrs":{"id":"musicPlaylist.author.personList.1.gender.genderType.string.unanswered"}}
+    #html5/inputRadioNormal{"label":"男性","attrs":{"id":"musicPlaylist.author.personList.1.gender.genderType.string.male"}}
+    #html5/inputRadioNormal{"label":"女性","attrs":{"id":"musicPlaylist.author.personList.1.gender.genderType.string.female"}}
+    #html5/inputRadioNormal{"label":"その他","attrs":{"id":"musicPlaylist.author.personList.1.gender.genderType.string.other"}}
+   </div>
+   <div>
+    #html5/textAreaNormal{"label":"コメント(DataType.Text)","attrs":{"id":"musicPlaylist.comment.commentList.1.text.text","placeholder":"abc"}}
+   </div>
+   <div>
+    <button type="submit" name="doSubmit">送信</button>
+   </div>
+   <h2>JSON</h2>
+   <div>
+    __MUSIC_PLAYLIST__MINION__
+   </div>
+   <h2>JSON-LD</h2>
+   <div>
+    __JSON_LD__
+   </div>
+  </form>
+  #kyojoLab/githubRibbon
+  <div><a href="__BASE_URI__/schemaOrgLab/index.html">Exit</a></div>
+ </body>
+</html>

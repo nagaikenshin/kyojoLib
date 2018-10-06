@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.kyojo.lab.mpr.ArticleRevisionMapper">
+	<resultMap id="AllResultMap" type="org.kyojo.lab.scm.ArticleRevision" >
+		<id column="seq" property="seq" jdbcType="INTEGER" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="text" property="text" jdbcType="CLOB" />
+		<result column="created_at" property="createdAt" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<select id="selectOrderBySeqDesc" resultMap="AllResultMap">
+		SELECT
+		 seq,
+		 name,
+		 text,
+		 created_at
+		FROM public.article_revision
+		ORDER BY seq DESC
+	</select>
+	<select id="selectMaxSeq" resultType="int">
+		SELECT MAX(seq)
+		FROM public.article_revision
+	</select>
+	<insert id="insert" parameterType="org.kyojo.lab.scm.ArticleRevision">
+		INSERT INTO public.article_revision(
+			name,
+			text
+		)
+		VALUES(
+			#{name,jdbcType=VARCHAR},
+			#{text,jdbcType=CLOB}
+		)
+	</insert>
+</mapper>

@@ -1,0 +1,7 @@
+<div id="rootBlock">
+ #topBar
+ #topBlock
+ #middleBlock
+ #bottomBlock
+ #bottomBar
+</div>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8" />
+  <title>Conversion Laboratory</title>
+  <link rel="stylesheet" href="__BASE_URI__/css/kyojoLab.css" />
+ </head>
+ <body>
+  #nav(__SID__,__ACT__)
+  <h1>Conversion Laboratory</h1>
+  <form id="f" method="post">
+   #html5/inputTextNormal{"label":"DateTime1","attrs":{"id":"dateTime1"},"desc":"java.util.Date \"2001-01-01T00:00:00+09:00\""}
+   #html5/inputTextNormal{"label":"DateTime2","attrs":{"id":"dateTime2"},"desc":"OffsetDateTime \"2001-01-01T00:00:00+09:00\""}
+   #html5/inputTextNormal{"label":"DateTime3","attrs":{"id":"dateTime3"},"desc":"Timestamp \"2001-01-01 00:00:00.000\""}
+   #html5/inputTextNormal{"label":"Date1","attrs":{"id":"date1"},"desc":"java.sql.Date \"2001-01-01\""}
+   #html5/inputTextNormal{"label":"Date2","attrs":{"id":"date2"},"desc":"LocalDate \"2001-01-01\""}
+   #html5/inputTextNormal{"label":"Date3","attrs":{"id":"date3"},"desc":"java.sql.Date \"Jan 01, 2001\""}
+   #html5/inputTextNormal{"label":"Date4","attrs":{"id":"date4"},"desc":"LocalDate \"2001（平成13）年1月1日\""}
+   #html5/inputTextNormal{"label":"Time1","attrs":{"id":"time1"},"desc":"java.sql.Time \"00:00:00\""}
+   #html5/inputTextNormal{"label":"Time2","attrs":{"id":"time2"},"desc":"LocalTime \"00:00:00\""}
+   #html5/inputTextNormal{"label":"Time3","attrs":{"id":"time3"},"desc":"java.sql.Time \"00:00 AM\""}
+   #html5/inputTextNormal{"label":"Time4","attrs":{"id":"time4"},"desc":"LocalTime \"23:59\""}
+   #html5/inputTextNormal{"label":"Number1","attrs":{"id":"bdList.1"},"desc":"BigDecimal \"1,000.000\""}
+   <button type="submit" name="doSubmit">Submit</button>
+  </form>
+  #kyojoLab/githubRibbon
+  <div><a href="__BASE_URI__/miscLab/index.html">Exit</a></div>
+ </body>
+</html>

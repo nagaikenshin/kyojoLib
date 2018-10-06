@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8" />
+  <title>File Laboratory</title>
+  <link rel="stylesheet" href="__BASE_URI__/css/kyojoLab.css" />
+ </head>
+ <body>
+  #nav(__SID__,__ACT__)
+  <h1>File Laboratory</h1>
+  <form id="f" method="post" enctype="multipart/form-data">
+   #html5/inputFileNormal{"label":"Image file","attrs":{"id":"imgFile","accept":"image/*"}}
+   #html5/inputFileNormal{"label":"Multiple files","attrs":{"id":"mltFiles","multiple":null}}
+   #html5/inputSubmitNormal{"attrs":{"id":"doUpload","value":"Upload"}}
+   <div style="color:red;">__UPLOAD_MSG__</div>
+
+   <table>
+    <thead>
+     <tr>
+      <th>No.</th>
+      <th>File name</th>
+      <th>Size</th>
+      <th>Upload time</th>
+      <th>Operation</th>
+     </tr>
+    </thead>
+    <tbody>
+     <tr><td>#html5Lab/fileLab/uploadedInfoListTableTBodyTr(__UPLOADED_INFO_LIST__MINION__)</td></tr>
+    </tbody>
+   </table>
+  </form>
+  #kyojoLab/githubRibbon
+  <div><a href="__BASE_URI__/html5Lab/index.html">Exit</a></div>
+ </body>
+</html>

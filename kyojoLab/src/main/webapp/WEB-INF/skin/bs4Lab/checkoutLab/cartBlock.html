@@ -1,0 +1,29 @@
+<h4 class="d-flex justify-content-between align-items-center mb-3">
+ <span class="text-muted">Your cart</span>
+ <span class="badge badge-secondary badge-pill">__CART_PRODUCT_NUM__</span>
+</h4>
+<ul class="list-group mb-3">
+ <li>#bs4Lab/checkoutLab/cartLi(__CART_LIST__MINION__)</li>
+ <li class="list-group-item d-flex justify-content-between">
+  <span>Total (USD)</span>
+  <strong>
+   #bs4Lab/checkoutLab/formatUSD(__TOTAL_AMOUNT__)
+  </strong>
+ </li>
+</ul>
+
+<form id="formRedeem" method="post" class="card p-2">
+ <!--
+ <div class="input-group">
+  <input type="text" class="form-control" placeholder="Promo code" name="promoCode">
+  <div class="input-group-append">
+   <button type="submit" class="btn btn-secondary">Redeem</button>
+  </div>
+ </div>
+ -->
+ #bs4/inputTextAppend{"compo":{"class":null},
+   "append":{"name":"button",
+     "attrs":{"id":"doRedeem","type":"submit","class":"btn btn-secondary"},"text":"Redeem"},
+   "attrs":{"id":"promoCode","placeholder":"Promo code"}}
+
+</form>

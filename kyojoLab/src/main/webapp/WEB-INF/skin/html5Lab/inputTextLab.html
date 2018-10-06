@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8" />
+  <title>InputText Laboratory</title>
+  <link rel="stylesheet" href="__BASE_URI__/css/kyojoLab.css" />
+ </head>
+ <body>
+  #nav(__SID__,__ACT__)
+  <h1>InputText Laboratory</h1>
+  <form id="f" method="post">
+   #html5/inputTextNormal{"label":"name","attrs":{"id":"name"}}
+   #html5/inputTextNormal{"label":"password","attrs":{"id":"pass","type":"password"}}
+   #html5/textAreaNormal{"label":"message","attrs":{"id":"msg"},"desc":{"text":"a description"}}
+   #html5/inputSubmitNormal{"attrs":{"id":"doInputText","value":"submit"}}
+  </form>
+  #kyojoLab/githubRibbon
+  <div><a href="__BASE_URI__/html5Lab/index.html">Exit</a></div>
+ </body>
+</html>

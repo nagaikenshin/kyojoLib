@@ -1,0 +1,3 @@
+rootProject.name = 'kyojoLib'
+
+include "kyojoCore", "kyojoLab", "kyojoGoogleAppEngine"

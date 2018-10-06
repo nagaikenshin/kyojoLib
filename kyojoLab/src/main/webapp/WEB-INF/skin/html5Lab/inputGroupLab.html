@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8" />
+  <title>InputGroup Laboratory</title>
+  <link rel="stylesheet" href="__BASE_URI__/css/html5.css" />
+  <link rel="stylesheet" href="__BASE_URI__/css/kyojoLab.css" />
+ </head>
+ <body>
+  #nav(__SID__,__ACT__)
+  <h1>InputGroup Laboratory</h1>
+  <form id="f" method="post">
+   <fieldset class="inputRadioNormal">
+    <legend>Blood type</legend>
+    <ul class="inputRadioNormal">
+     <li>#html5/inputRadioNormal{"label":"Unanswered","attrs":{"id":"blood.U"}}</li>
+     <li>#html5/inputRadioNormal{"label":"Type A","attrs":{"id":"blood.A"}}</li>
+     <li>#html5/inputRadioNormal{"label":"Type B","attrs":{"id":"blood.B"}}</li>
+     <li>#html5/inputRadioNormal{"label":"Type O","attrs":{"id":"blood.O"}}</li>
+     <li>#html5/inputRadioNormal{"label":"Type AB","attrs":{"id":"blood.AB"}}</li>
+    </ul>
+   </fieldset>
+   <fieldset class="inputCheckboxNormal">
+    <legend>Days of the week</legend>
+    <ul class="inputCheckboxNormal">
+     <li>#html5/inputCheckboxNormal{"label":"Sun.","attrs":{"id":"weekday.0"}}</li>
+     <li>#html5/inputCheckboxNormal{"label":"Mon.","attrs":{"id":"weekday.1"}}</li>
+     <li>#html5/inputCheckboxNormal{"label":"Tue.","attrs":{"id":"weekday.2"}}</li>
+     <li>#html5/inputCheckboxNormal{"label":"Wed.","attrs":{"id":"weekday.3"}}</li>
+     <li>#html5/inputCheckboxNormal{"label":"Thu.","attrs":{"id":"weekday.4"}}</li>
+     <li>#html5/inputCheckboxNormal{"label":"Fri.","attrs":{"id":"weekday.5"}}</li>
+     <li>#html5/inputCheckboxNormal{"label":"Sat.","attrs":{"id":"weekday.6"}}</li>
+    </ul>
+   </fieldset>
+   <fieldset class="inputCheckboxNormal">
+    <legend>Flag(Boolean)</legend>
+    #html5/inputCheckboxElement{"attrs":{"id":"flgBoolean"}}
+   </fieldset>
+   <fieldset class="inputCheckboxNormal">
+    <legend>Flag(String)</legend>
+    #html5/inputCheckboxElement{"attrs":{"id":"flgString.c"}}
+   </fieldset>
+   <button type="submit" name="doInputGroup">Send</button>
+  </form>
+  #kyojoLab/githubRibbon
+  <div><a href="__BASE_URI__/html5Lab/index.html">Exit</a></div>
+ </body>
+</html>
