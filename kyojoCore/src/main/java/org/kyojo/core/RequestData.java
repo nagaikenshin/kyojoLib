@@ -446,7 +446,7 @@ public class RequestData implements Map<String, Object> {
 								try {
 									Map<String, Object> tmpMap = My.deminion(mnn, Map.class);
 									TemplateEngine.buildMagicFloorRecursive(gbd, null, tmpMap, null, null, null, null,
-											ns + ".", bltMap, null, 0);
+											ns + ".", bltMap, null, 0, 3, 0);
 								} catch(JsonSyntaxException jse) {
 									logger.warn("JsonSyntaxException: " + jse.getMessage());
 									logger.warn("json: " + StringUtils.abbreviate(mnn, 1024));
@@ -469,7 +469,7 @@ public class RequestData implements Map<String, Object> {
 							try {
 								Map<String, Object> tmpMap = My.deminion(vals[0], Map.class);
 								TemplateEngine.buildMagicFloorRecursive(gbd, null, tmpMap, null, null, null, null,
-										ns + ".", bltMap, null, 0);
+										ns + ".", bltMap, null, 0, 3, 0);
 							} catch(JsonSyntaxException jse) {
 								logger.warn("JsonSyntaxException: " + jse.getMessage());
 								logger.warn("json: " + StringUtils.abbreviate(vals[0], 1024));
@@ -496,7 +496,7 @@ public class RequestData implements Map<String, Object> {
 								try {
 									Map<String, Object> tmpMap = My.deminion(mnn, Map.class);
 									TemplateEngine.buildMagicFloorRecursive(gbd, null, tmpMap, null, null, null, null,
-											ns + ".", bltMap, null, 0);
+											ns + ".", bltMap, null, 0, 3, 0);
 								} catch(JsonSyntaxException jse) {
 									logger.warn("JsonSyntaxException: " + jse.getMessage());
 									logger.warn("json: " + StringUtils.abbreviate(mnn, 1024));
@@ -522,7 +522,7 @@ public class RequestData implements Map<String, Object> {
 								try {
 									Map<String, Object> tmpMap = My.deminion(mnn, Map.class);
 									TemplateEngine.buildMagicFloorRecursive(gbd, null, tmpMap, null, null, null, null,
-											ns + ".", bltMap, null, 0);
+											ns + ".", bltMap, null, 0, 3, 0);
 								} catch(JsonSyntaxException jse) {
 									logger.warn("JsonSyntaxException: " + jse.getMessage());
 									logger.warn("json: " + StringUtils.abbreviate(mnn, 1024));

@@ -11,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.kyojo.core.io.IOLayer;
-import org.kyojo.minion.My;
 
 import groovy.util.GroovyScriptEngine;
 import groovy.util.ResourceConnector;
@@ -73,13 +72,21 @@ public class PluginManager implements ResourceConnector {
 	protected PluginFileInfo getPluginFile2(String act, String key, Cache cache, SessionData ssd) {
 		IOLayer ioLayer = gbd.get(IOLayer.class);
 		String[] pluginPkgs = ioLayer.getPluginPkgs(ssd).split(",");
-		key = key.replaceAll(File.pathSeparator, "/").replaceAll("/+", "/").replaceAll("\\.+", ".");
+		String key2 = key.replaceAll(File.pathSeparator, "/").replaceAll("/+", "/").replaceAll("\\.+", ".");
+		String[] key3s = key2.split("/");
+		StringBuilder keySB = new StringBuilder();
+		for(int kidx = 0; kidx < key3s.length - 1; kidx++) {
+			keySB.append(key3s[kidx]);
+			keySB.append("/");
+		}
+		keySB.append(StringUtils.capitalize(key3s[key3s.length - 1]));
+		String key4 = keySB.toString();
 
 		PluginFileInfo pfInfo = new PluginFileInfo();
 		pfInfo.mPath = "";
 		try {
 			boolean withAct = false;
-			if(StringUtils.isNotBlank(act) && key.indexOf("/") < 0) {
+			if(StringUtils.isNotBlank(act) && key4.indexOf("/") < 0) {
 				act = act.replaceAll(File.pathSeparator, "/").replaceAll("/+", "/").replaceAll("\\.+", ".");
 				String[] elms = act.split("/");
 				for(int ei = elms.length - 1; ei >= 0; ei--) {
@@ -91,7 +98,7 @@ public class PluginManager implements ResourceConnector {
 					}
 					pfInfo.mPath = act2.toString();
 					for(String pluginPkg : pluginPkgs) {
-						pfInfo.file = new File(pluginDPath + pluginPkg + pfInfo.mPath + File.separator + key + ".groovy");
+						pfInfo.file = new File(pluginDPath + pluginPkg + pfInfo.mPath + File.separator + key4 + ".groovy");
 						pfInfo.pkg = pluginPkg;
 
 						if(pfInfo.file.canRead()) {
@@ -125,7 +132,7 @@ public class PluginManager implements ResourceConnector {
 			if(!withAct) {
 				pfInfo.mPath = "";
 				for(String pluginPkg : pluginPkgs) {
-					pfInfo.file = new File(pluginDPath + pluginPkg + key + ".groovy");
+					pfInfo.file = new File(pluginDPath + pluginPkg + key4 + ".groovy");
 					pfInfo.pkg = pluginPkg;
 					if(pfInfo.file.canRead()) {
 						if(cache == null) {
@@ -156,16 +163,14 @@ public class PluginManager implements ResourceConnector {
 		return pfInfo;
 	}
 
-	private String sKey2ClassName(String sKey) {
+	private String sKey2Path(String sKey) {
 		StringBuilder sb = new StringBuilder();
-		String[] elems = sKey.split("/");
+		String[] elems = sKey.replaceAll("/+", "/").replaceAll("\\.+", ".").split("/");
 		for(int idx = 0; idx < elems.length - 1; idx++) {
 			sb.append(elems[idx]);
-			if(idx > 0) {
-				sb.append(".");
-			}
+			sb.append("/");
 		}
-		sb.append(My.pascalize(elems[elems.length - 1]));
+		sb.append(StringUtils.capitalize(elems[elems.length - 1]));
 
 		return sb.toString();
 	}
@@ -177,13 +182,14 @@ public class PluginManager implements ResourceConnector {
 			if(pfInfo.file != null) {
 				if(pfInfo.file.canRead()) {
 					String dlm = StringUtils.isEmpty(pfInfo.mPath) ? "" : ".";
+					String path = sKey2Path(sKey);
 					String className = (pfInfo.pkg + pfInfo.mPath).replaceAll("/", ".")
-							+ dlm + sKey2ClassName(sKey);
+							+ dlm + path.replaceAll("/", ".");
 					try {
 						return loader.loadClass(className);
 					} catch(ClassNotFoundException cnfe) {
 						dlm = StringUtils.isEmpty(pfInfo.mPath) ? "" : "/";
-						String scriptName = pfInfo.pkg + pfInfo.mPath + dlm + sKey + ".groovy";
+						String scriptName = pfInfo.pkg + pfInfo.mPath + dlm + path + ".groovy";
 						return gse.loadScriptByName(scriptName);
 					}
 				}

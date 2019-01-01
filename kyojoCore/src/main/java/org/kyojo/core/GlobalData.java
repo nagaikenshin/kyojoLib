@@ -160,7 +160,9 @@ public final class GlobalData extends ConcurrentHashMap<String, Object> {
 
 		try {
 			cacheIO = ioLayer.acquireCacheIO(key);
+			logger.trace("cacheIO getInputStream start: " + key);
 			InputStream is = cacheIO.getInputStream();
+			logger.trace("cacheIO getInputStream end: " + key);
 			if(is != null) {
 				jfg = new JavaFGets(is);
 
@@ -222,7 +224,9 @@ public final class GlobalData extends ConcurrentHashMap<String, Object> {
 			}
 			if(cacheIO != null) {
 				try {
+					logger.trace("cacheIO release start.");
 					cacheIO.release();
+					logger.trace("cacheIO release end.");
 				} catch(IOException ioe) {}
 			}
 		}
@@ -335,8 +339,11 @@ public final class GlobalData extends ConcurrentHashMap<String, Object> {
 		OutputStream os = null;
 
 		try {
-			cacheIO = ioLayer.acquireCacheIO(cache.getKey());
+			String key = cache.getKey();
+			cacheIO = ioLayer.acquireCacheIO(key);
+			logger.trace("cacheIO getOutputStream start: " + key);
 			os = cacheIO.getOutputStream();
+			logger.trace("cacheIO getOutputStream end: " + key);
 			if(os != null) {
 				// final String ENCODING = "ISO-8859-1";
 				final String ENCODING = "UTF-8";
@@ -387,7 +394,9 @@ public final class GlobalData extends ConcurrentHashMap<String, Object> {
 			}
 			if(cacheIO != null) {
 				try {
+					logger.trace("cacheIO release start.");
 					cacheIO.release();
+					logger.trace("cacheIO release end.");
 				} catch(IOException ioe) {}
 			}
 		}

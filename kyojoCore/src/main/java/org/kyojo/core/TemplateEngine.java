@@ -55,12 +55,14 @@ import org.kyojo.core.annotation.InheritDefault;
 import org.kyojo.core.annotation.InheritParent;
 import org.kyojo.core.annotation.OutOfRequestData;
 import org.kyojo.core.annotation.OutOfResponseData;
+import org.kyojo.core.annotation.TrivialRequestData;
 import org.kyojo.core.validation.ManualLocaleMessageInterpolator;
 import org.kyojo.gson.JsonParseException;
 import org.kyojo.gson.JsonSyntaxException;
 import org.kyojo.gson.reflect.TypeToken;
 import org.kyojo.minion.My;
 import org.kyojo.plugin.markup.BracketsNode;
+import org.kyojo.schemaorg.SchemaOrgProperty;
 import org.kyojo.schemaorg.SimpleJsonBuilder;
 
 public class TemplateEngine {
@@ -105,9 +107,13 @@ public class TemplateEngine {
 
 	private static int MAGIC_FLOORS_LIMIT = 50;
 
-	private static int MAGIC_FLOORS_THROUGH = 5;
+	private static int magicFloorsThrough = 20;
 
-	// private static int MAGIC_FLOORS_DEEP = 8;
+	private static int magicListDepthLimit = 1;
+
+	private static int minionDepthLimit = 5;
+
+	private static boolean isToMinionSchemaOrgProperty = false;
 
 	private LinkedList<Cache> cacheTower = new LinkedList<>();
 
@@ -206,6 +212,41 @@ public class TemplateEngine {
 			isLogMagicTower = true;
 		}
 
+		val = gbd.get("MAGIC_FLOORS_THROUGH");
+		if(val != null) {
+			try {
+				int ival = Integer.parseInt(val.toString());
+				if(ival > 0) {
+					magicFloorsThrough = ival;
+				}
+			} catch(Exception ex) {}
+		}
+
+		val = gbd.get("MAGIC_LIST_DEPTH_LIMIT");
+		if(val != null) {
+			try {
+				int ival = Integer.parseInt(val.toString());
+				if(ival > 0) {
+					magicListDepthLimit = ival;
+				}
+			} catch(Exception ex) {}
+		}
+
+		val = gbd.get("MINION_DEPTH_LIMIT");
+		if(val != null) {
+			try {
+				int ival = Integer.parseInt(val.toString());
+				if(ival > 0) {
+					minionDepthLimit = ival;
+				}
+			} catch(Exception ex) {}
+		}
+
+		val = gbd.get("IS_TO_MINION_SCHEMA_ORG_PROPERTY");
+		if(val != null && !val.toString().equals("0") && !val.toString().equalsIgnoreCase("false")) {
+			isToMinionSchemaOrgProperty = true;
+		}
+
 		act = rqd.getRequest().getParameter(Constants.ACT_KEY);
 		if(StringUtils.isBlank(act)) act = Constants.DEFAULT_ACT;
 		ext = rqd.getRequest().getParameter(Constants.EXT_KEY);
@@ -263,6 +304,7 @@ public class TemplateEngine {
 		try {
 			cache = cacheParsedTemplate(Constants.TEMPLATE_ROOT, "", "", false, false, null);
 		} catch(PluginException pe) {
+			logger.error(pe.getMessage(), pe);
 			HashMap<String, String> err = new HashMap<>();
 			err.put("errorMessage", pe.getMessage());
 			ssd.turnOver(err, Constants.ERROR_SKIN);
@@ -416,10 +458,11 @@ public class TemplateEngine {
 				// 下位クラスのフィールドを優先
 				continue;
 			}
-			if(!gsMtdsMap.containsKey(klc)) {
-				// get/setメソッド優先
-				continue;
-			}
+			// groovyのアノテーション判定のため最初は入れる
+			// if(gsMtdsMap.containsKey(klc)) {
+			//	// get/setメソッド優先
+			//	continue;
+			// }
 
 			if(fld.getAnnotation(Deprecated.class) != null) {
 				continue;
@@ -466,6 +509,7 @@ public class TemplateEngine {
 	public String parseTemplate(String indent, String sKey, String args,
 			String br, boolean isForced)
 			throws PluginException, RedirectThrowable, CompleteThrowable {
+		logger.trace("parseTemplate start: " + sKey);
 		if(args == null) args = "";
 		String dKey = "";
 		if(StringUtils.isNotEmpty(args)) {
@@ -483,6 +527,7 @@ public class TemplateEngine {
 			String args2 = args;
 			if(args.length() > 0 && magicPtrn != null) {
 				// magic word展開
+				logger.trace("parseTemplate magicPtrn start: " + sKey);
 				Matcher mc = magicPtrn.matcher(args);
 				StringBuffer sb = new StringBuffer();
 				while(mc.find()) {
@@ -519,6 +564,7 @@ public class TemplateEngine {
 				}
 				mc.appendTail(sb);
 				args2 = sb.toString();
+				logger.trace("parseTemplate magicPtrn end: " + sKey);
 			}
 
 			parseTemplate(cache, indent, "#", sKey, args2, br, isForced);
@@ -534,12 +580,14 @@ public class TemplateEngine {
 		while(itr.hasNext()) {
 			sb.append(itr.next());
 		}
+		logger.trace("parseTemplate end: " + sKey);
 		return sb.toString();
 	}
 
 	// ToDo: 可能なら通常のparseTemplateに移行して削除
 	public void parseTemplate(Cache parent, String indent, String sKey, String args, boolean isForced)
 			throws PluginException, RedirectThrowable, CompleteThrowable {
+		logger.trace("parseTemplate start: " + sKey);
 		if(args == null) args = "";
 		String dKey = "";
 		if(StringUtils.isNotEmpty(args)) {
@@ -564,11 +612,13 @@ public class TemplateEngine {
 		while(itr.hasNext()) {
 			parent.addLine(itr.next());
 		}
+		logger.trace("parseTemplate end: " + sKey);
 	}
 
 	public void parseTemplate(Cache parent, String indent, String type, String sKey, String args,
 			String br, boolean isForced)
 			throws PluginException, RedirectThrowable, CompleteThrowable {
+		logger.trace("parseTemplate start: " + sKey);
 		if(isLogParseTemplete) {
 			if(args.equals("null")) {
 				logger.debug("parsing: " + indent + type + sKey + "(null)");
@@ -578,6 +628,7 @@ public class TemplateEngine {
 		}
 		if(cacheTower.size() > MAGIC_FLOORS_LIMIT) {
 			logger.warn("floors exceeded.");
+			logger.trace("parseTemplate end: " + sKey);
 			return;
 		}
 
@@ -599,12 +650,13 @@ public class TemplateEngine {
 		}
 		String ssdKey = Cache.concatKeys(sKey, dKey, "mnn");
 		if(type.equals("!")) {
-			// TODO: finally 必要？
+			// TODO: finally あるいは テスト対象 必要？
 		} else if(type.equals("?")) {
 			parent.setExpires(Time14.OLD);
-			if(act != null && act.equals(sKey)) {
+			if(act != null && (act.equals(sKey) || act.endsWith("/" + sKey))) {
 				parent.setSkipAfter(true);
 			} else {
+				logger.trace("parseTemplate end: " + sKey);
 				return;
 			}
 		}
@@ -624,13 +676,19 @@ public class TemplateEngine {
 				raiseMagicTower();
 				mtRaised = true;
 
+				logger.trace("parseTemplate loadPlugin start: " + act);
 				Class<?> cls = pm.loadPlugin(act, sKey, ssd);
+				logger.trace("parseTemplate loadPlugin end: " + act);
 				if(cls != null) {
 					hasPlugin = true;
 
 					// メソッドとフィールドの情報を収集
+					logger.trace("parseTemplate getPluginMethods start: " + cls);
 					getPluginMethods(cls, plgMtdsMap);
+					logger.trace("parseTemplate getPluginMethods end: " + cls);
+					logger.trace("parseTemplate getMethodsAndFields start: " + cls);
 					getMethodsAndFields(cls, gsMtdsMap, fldMap, gsMtdsMapMap, fldMapMap);
+					logger.trace("parseTemplate getMethodsAndFields end: " + cls);
 
 					// submitの場合、あればnameからpathを取得
 					if(!submitCalled) {
@@ -651,17 +709,30 @@ public class TemplateEngine {
 
 					Cache mc = null;
 					boolean needInit = false;
-					// ssdに前回アクセス時のデータがあるか
-					mc = (Cache)ssd.get(ssdKey);
+					if(!isMapArgs && !isListMapArgs
+							&& (gsMtdsMap.size() > 0 || fldMap.size() > 0)) {
+						// stateless
+						// ssdに前回アクセス時のデータがあるか
+						mc = (Cache)ssd.get(ssdKey);
+						if(mc == null) {
+							if(isLogSaveAndLoadResult) {
+								logger.debug("ssd-load: " + ssdKey + " -> (no data)");
+							}
+						}
+					} else {
+						// stateful
+						if(isLogSaveAndLoadResult) {
+							logger.debug("ssd-load: " + ssdKey + " -> (skipped)");
+						}
+					}
 					if(mc == null) {
 						// ない
 						needInit = true;
-						if(isLogSaveAndLoadResult) {
-							logger.debug("ssd-load: " + ssdKey + " -> (no data)");
-						}
 					} else {
 						// プラグインファイルの更新時刻と比較
+						logger.trace("parseTemplate getPluginFile start: " + sKey);
 						File pf = pm.getPluginFile(act, sKey, null, ssd);
+						logger.trace("parseTemplate getPluginFile end: " + sKey);
 						long lm = pf.lastModified();
 						if(lm == 0L) {
 							needInit = true;
@@ -681,7 +752,9 @@ public class TemplateEngine {
 
 					if(needInit) {
 						// なければインスタンス生成
+						logger.trace("parseTemplate newInstance start: " + cls);
 						obj = cls.newInstance();
+						logger.trace("parseTemplate newInstance end: " + cls);
 					} else {
 						Iterator<String> itr = mc.getLines();
 						String mnn = null;
@@ -721,7 +794,9 @@ public class TemplateEngine {
 						Object res;
 						try {
 							final Method inMtd = plgMtdsMap.get("inMtd");
+							logger.trace("parseTemplate initialize start: " + sKey);
 							res = inMtd.invoke(obj, args, gbd, ssd, rqd, rpd);
+							logger.trace("parseTemplate initialize end: " + sKey);
 							if(rpd.getResponse().isCommitted()) {
 								throw new CompleteThrowable();
 							}
@@ -736,12 +811,14 @@ public class TemplateEngine {
 								throw (CompleteThrowable)cause;
 							} else if(cause instanceof PluginException) {
 								throw (PluginException)cause;
+							} else {
+								throw ite;
 							}
-							throw ite;
 						}
 
 						resultFlgs.put("pluginRan", true);
 						if(isRedirectable(res)) {
+							logger.info("throwing RedirectThrowable: " + res);
 							throw new RedirectThrowable(res);
 						} else {
 							updatePluginResult(obj, cls, plgMtdsMap, gsMtdsMap, fldMap);
@@ -750,7 +827,9 @@ public class TemplateEngine {
 						Object res;
 						try {
 							final Method rcMtd = plgMtdsMap.get("rcMtd");
+							logger.trace("parseTemplate recycle start: " + sKey);
 							res = rcMtd.invoke(obj, args, gbd, ssd, rqd, rpd);
+							logger.trace("parseTemplate recycle end: " + sKey);
 							if(rpd.getResponse().isCommitted()) {
 								throw new CompleteThrowable();
 							}
@@ -765,12 +844,14 @@ public class TemplateEngine {
 								throw (CompleteThrowable)cause;
 							} else if(cause instanceof PluginException) {
 								throw (PluginException)cause;
+							} else {
+								throw ite;
 							}
-							throw ite;
 						}
 
 						resultFlgs.put("pluginRan", true);
 						if(isRedirectable(res)) {
+							logger.info("throwing RedirectThrowable: " + res);
 							throw new RedirectThrowable(res);
 						} else {
 							updatePluginResult(obj, cls, plgMtdsMap, gsMtdsMap, fldMap);
@@ -797,11 +878,14 @@ public class TemplateEngine {
 							// メソッド
 							Method[] gsMtds = ent.getValue();
 							boolean found = false;
+							boolean isTrivial = false;
 							if(gsMtds[0] != null && gsMtds[1] != null) {
 								Method sm = gsMtds[1];
 								Field fld = fldMap.get(ent.getKey());
 								if(sm.isAnnotationPresent(OutOfRequestData.class)) {
 									continue;
+								} else if(sm.isAnnotationPresent(TrivialRequestData.class)) {
+									isTrivial = true;
 								} else if(sm.isAnnotationPresent(InheritDefault.class)) {
 									inheritDefaultMtds.add(sm);
 									continue;
@@ -811,6 +895,8 @@ public class TemplateEngine {
 								} else if(fld != null) {
 									if(fld.isAnnotationPresent(OutOfRequestData.class)) {
 										continue;
+									} else if(fld.isAnnotationPresent(TrivialRequestData.class)) {
+										isTrivial = true;
 									} else if(fld.isAnnotationPresent(InheritDefault.class)) {
 										inheritDefaultMtds.add(sm);
 										continue;
@@ -944,7 +1030,9 @@ public class TemplateEngine {
 									}
 								}
 								if(found) {
-									prmFound = true;
+									if(!isTrivial) {
+										prmFound = true;
+									}
 								} else {
 									notFoundMtdsMap.put(ent.getKey(), ent.getValue());
 								}
@@ -953,6 +1041,7 @@ public class TemplateEngine {
 						for(Map.Entry<String, Field> ent : fldMap.entrySet()) {
 							// フィールド
 							boolean found = false;
+							boolean isTrivial = false;
 							if(gsMtdsMap.containsKey(ent.getKey())) {
 								continue;
 							}
@@ -960,6 +1049,8 @@ public class TemplateEngine {
 							Field fld = ent.getValue();
 							if(fld.isAnnotationPresent(OutOfRequestData.class)) {
 								continue;
+							} else if(fld.isAnnotationPresent(TrivialRequestData.class)) {
+								isTrivial = true;
 							} else if(fld.isAnnotationPresent(InheritDefault.class)) {
 								inheritDefaultFlds.add(fld);
 								continue;
@@ -1101,7 +1192,9 @@ public class TemplateEngine {
 								}
 							}
 							if(found) {
-								prmFound = true;
+								if(!isTrivial) {
+									prmFound = true;
+								}
 							} else {
 								notFoundFldsMap.put(ent.getKey(), ent.getValue());
 							}
@@ -1150,7 +1243,9 @@ public class TemplateEngine {
 						}
 
 						if(!needInit) {
+							logger.trace("parseTemplate validate start: " + sKey);
 							validate(obj, cls);
+							logger.trace("parseTemplate validate end: " + sKey);
 						}
 					}
 
@@ -1415,19 +1510,24 @@ public class TemplateEngine {
 				parent.setExpires(Time14.OLD);
 				ssd.remove(ssdKey);
 			} catch(PluginException pe) {
-				logger.warn("sKey=" + sKey + ", args=" + args);
-				logger.warn(pe.getMessage(), pe);
+				logger.warn("PluginException: sKey=" + sKey + ", args=" + args);
 				parent.setExpires(Time14.OLD);
 				ssd.remove(ssdKey);
 				if(pe.getLevel().compareTo(PluginException.Level.WARN) <= 0) {
+					logger.trace("parseTemplate end: " + sKey);
 					throw pe;
+				} else {
+					logger.warn(pe.getMessage(), pe);
 				}
 			} finally {
 				if(obj != null) {
 					// 最後に記録
-					if(resultFlgs.get("pluginRan") || resultFlgs.get("templateParsed")) {
+					if(!isMapArgs && !isListMapArgs && resultFlgs.get("pluginRan")
+							&& (gsMtdsMap.size() > 0 || fldMap.size() > 0)) {
 						// String mnn = My.minion(obj);
+						logger.trace("parseTemplate finally toJson start: " + sKey);
 						String mnn = SimpleJsonBuilder.toJson(obj);
+						logger.trace("parseTemplate finally toJson end: " + sKey);
 						Cache mc = new Cache(sKey, My.hs(args), "mnn", new Time14());
 						mc.addLine(mnn);
 						if(isLogSaveAndLoadResult) {
@@ -1443,12 +1543,14 @@ public class TemplateEngine {
 			}
 
 			if(obj != null || resultFlgs.get("templateParsed")) {
+				logger.trace("parseTemplate end: " + sKey);
 				return;
 			}
 		}
 
 		logger.warn("couldn't parse plugin " + type + sKey + args0 + ".");
 		parent.setExpires(Time14.OLD);
+		logger.trace("parseTemplate end: " + sKey);
 	}
 
 	private void parseTemplateSub(Cache parent, String indent,
@@ -1459,7 +1561,9 @@ public class TemplateEngine {
 			boolean isMapArgs, boolean isListMapArgs)
 			throws PluginException, RedirectThrowable, CompleteThrowable,
 				IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		logger.trace("parseTemplateSub loadCacheIfPossible start: " + sKey);
 		Cache child = gbd.loadCacheIfPossible(sKey, dKey, skin.getExt(), true);
+		logger.trace("parseTemplateSub loadCacheIfPossible end: " + sKey);
 		if(child == null) {
 			if(cls != null) {
 				Time14 expires = args.length() > 0 && !isMapArgs && !isListMapArgs
@@ -1472,8 +1576,10 @@ public class TemplateEngine {
 						Object res;
 						try {
 							final Method smMtd = plgMtdsMap.get("smMtd");
+							logger.trace("parseTemplateSub submit start: " + sKey);
 							res = smMtd.invoke(obj, child, args, gbd, ssd, rqd, rpd,
 									this, indent, isForced);
+							logger.trace("parseTemplateSub submit end: " + sKey);
 							if(rpd.getResponse().isCommitted()) {
 								throw new CompleteThrowable();
 							}
@@ -1488,11 +1594,13 @@ public class TemplateEngine {
 								throw (CompleteThrowable)cause;
 							} else if(cause instanceof PluginException) {
 								throw (PluginException)cause;
+							} else {
+								throw ite;
 							}
-							throw ite;
 						}
 
 						if(isRedirectable(res)) {
+							logger.info("throwing RedirectThrowable: " + res);
 							throw new RedirectThrowable(res);
 						} else {
 							updatePluginResult(obj, cls, plgMtdsMap, gsMtdsMap, fldMap);
@@ -1502,8 +1610,10 @@ public class TemplateEngine {
 						Object res;
 						try {
 							final Method bcMtd = plgMtdsMap.get("bcMtd");
+							logger.trace("parseTemplateSub buildCache start: " + sKey);
 							res = bcMtd.invoke(obj, child, args, gbd, ssd, rqd, rpd,
 									this, indent, isForced);
+							logger.trace("parseTemplateSub buildCache end: " + sKey);
 							if(rpd.getResponse().isCommitted()) {
 								throw new CompleteThrowable();
 							}
@@ -1518,11 +1628,13 @@ public class TemplateEngine {
 								throw (CompleteThrowable)cause;
 							} else if(cause instanceof PluginException) {
 								throw (PluginException)cause;
+							} else {
+								throw ite;
 							}
-							throw ite;
 						}
 
 						if(isRedirectable(res)) {
+							logger.info("throwing RedirectThrowable: " + res);
 							throw new RedirectThrowable(res);
 						} else {
 							updatePluginResult(obj, cls, plgMtdsMap, gsMtdsMap, fldMap);
@@ -1558,7 +1670,9 @@ public class TemplateEngine {
 			parent.addChildKey(child.getKey(), child.getExpires()); // ToDo: 必要？
 
 			if(!isForced) {
+				logger.trace("appendPiecedTemplate completeCache start: " + sKey);
 				gbd.completeCache(child);
+				logger.trace("appendPiecedTemplate completeCache end: " + sKey);
 			}
 
 			Iterator<String> itr = child.getLines();
@@ -1597,7 +1711,9 @@ public class TemplateEngine {
 			parent.addChildKey(child.getKey(), child.getExpires());
 
 			if(!isForced) {
+				logger.trace("pieceTemplate completeCache start: " + sKey);
 				gbd.completeCache(child);
+				logger.trace("pieceTemplate completeCache end: " + sKey);
 			}
 
 			Iterator<String> itr = child.getLines();
@@ -1688,7 +1804,7 @@ public class TemplateEngine {
 		magicFloor.clear();
 		currentFloor.clear();
 		buildMagicFloorRecursive(gbd, rpd, obj, gsMtdsMap, fldMap, gsMtdsMapMap, fldMapMap,
-				"", currentFloor, rb, 0);
+				"", currentFloor, rb, 0, magicListDepthLimit, 0);
 
 		// プラグイン自身の置換
 		String key = My.constantize(Constants.MINION_SUFFIX);
@@ -1738,11 +1854,7 @@ public class TemplateEngine {
 	private void copyToMagicFloor() {
 		magicFloor.clear();
 
-		int through = MAGIC_FLOORS_THROUGH;
-		// if(magicTower.size() >= MAGIC_FLOORS_DEEP) {
-		//	through = 1;
-		// }
-		int tmpLmt = magicTower.size() - through - 1;
+		int tmpLmt = magicTower.size() - magicFloorsThrough - 1;
 		if(tmpLmt < 1) {
 			tmpLmt = 1;
 		}
@@ -1808,7 +1920,7 @@ public class TemplateEngine {
 		logger.warn("can't redirect to " + obj.toString());
 		return false;
 	}
-
+/*
 	public <T> Cache appendParsedTemplate(Object obj, Class<T> cls, Cache parent,
 			String sKey, String dKey, String indent, boolean isForced, Time14 expires)
 			throws PluginException, RedirectThrowable, CompleteThrowable {
@@ -1833,28 +1945,30 @@ public class TemplateEngine {
 
 		return parent;
 	}
-
+*/
 	public Cache appendParsedTemplate(Cache parent,
 			String sKey, String args, String indent, boolean isForced)
 			throws PluginException, RedirectThrowable, CompleteThrowable {
+		return appendParsedTemplate(null, null, parent, sKey, args, indent, isForced);
+	}
+
+	public Cache appendParsedTemplate(Object obj, Class<?> cls, Cache parent,
+			String sKey, String args, String indent, boolean isForced)
+			throws PluginException, RedirectThrowable, CompleteThrowable {
+		logger.trace("appendParsedTemplate start: " + sKey);
+
+		if(obj != null && cls != null) {
+			updatePluginResult(obj, cls);
+		}
+
 		String dKey = "";
 		if(StringUtils.isNotEmpty(args)) {
 			dKey = My.hs(args);
 		}
 
 		Cache cache = new Cache(sKey, dKey, skin.getExt(), new Time14());
+		parseTemplate(cache, indent, "#", sKey, args, defaultBr, isForced);
 
-		// boolean ctRaised = false;
-		try {
-			// raiseCacheTower(cache);
-			// ctRaised = true;
-
-			parseTemplate(cache, indent, "#", sKey, args, defaultBr, isForced);
-		} finally {
-			// if(ctRaised) reduceCacheTower();
-		}
-
-		// parent.addChildKey(cache.getKey(), cache.getExpires());
 		cache.copyRefFiles(parent);
 		cache.copyMissFiles(parent);
 		cache.copyChildKeys(parent);
@@ -1872,17 +1986,20 @@ public class TemplateEngine {
 
 		// addDebugCacheTree(cache, indent, "created");
 
+		logger.trace("appendParsedTemplate end: " + sKey);
 		return parent;
 	}
 
 	public Cache cacheParsedTemplate(String sKey, String dKey, String indent,
 			boolean skipLoad, boolean isForced, Time14 expires)
 			throws PluginException, RedirectThrowable, CompleteThrowable {
+		logger.trace("cacheParsedTemplate start: " + sKey);
 		Cache cache = null;
 		if(skipLoad || !isForced) {
 			cache = gbd.loadCacheIfPossible(sKey, dKey, skin.getExt(), true);
 			if(cache != null) {
 				addDebugCacheTree(cache, indent, "loaded");
+				logger.trace("cacheParsedTemplate end: " + sKey);
 				return cache;
 			}
 		}
@@ -1897,6 +2014,7 @@ public class TemplateEngine {
 			logger.warn("no template " + sKey + ".");
 			cache.addLine("(no template.)");
 			addDebugCacheTree(cache, indent, "no template");
+			logger.trace("cacheParsedTemplate end: " + sKey);
 			return cache;
 		}
 
@@ -1929,6 +2047,7 @@ public class TemplateEngine {
 
 				if(isCont) {
 					// 直前の行に連結する処理
+					logger.trace("cacheParsedTemplate tppt1 start: " + sKey);
 					tpmt1 = tppt1.matcher(line);
 					if(tpmt1.matches()) {
 						String tgt1 = tpmt1.group(2);
@@ -1945,6 +2064,7 @@ public class TemplateEngine {
 								tgt2 = tgt1;
 							}
 
+							logger.trace("cacheParsedTemplate clspt start: " + sKey);
 							clsmt = clspt.matcher(tgt1);
 							if(clsmt.find()) {
 								clstg = clsmt.group(1);
@@ -1952,6 +2072,7 @@ public class TemplateEngine {
 								tgtLen -= clstg.length();
 								tgt2 = tgt1.substring(0, tgtLen);
 							}
+							logger.trace("cacheParsedTemplate clspt end: " + sKey);
 
 							if(tgtLen > 1) {
 								ech = tgt1.charAt(tgtLen - 1);
@@ -1965,6 +2086,7 @@ public class TemplateEngine {
 							}
 						}
 					}
+					logger.trace("cacheParsedTemplate tppt1 end: " + sKey);
 
 					if(!isMatched) {
 						logger.warn("args is not continuous. sKey=" + sKey + ","
@@ -1985,6 +2107,7 @@ public class TemplateEngine {
 					ech = '\0';
 
 					// テンプレート/プラグイン展開
+					logger.trace("cacheParsedTemplate tppt1 start: " + sKey);
 					tpmt1 = tppt1.matcher(line);
 					if(tpmt1.matches()) {
 						indent2 = tpmt1.group(1);
@@ -1992,6 +2115,7 @@ public class TemplateEngine {
 						br2 = tpmt1.group(3);
 
 						String tgt2 = tgt1;
+						logger.trace("cacheParsedTemplate opnpt start: " + sKey);
 						opnmt = opnpt.matcher(tgt1);
 						if(opnmt.lookingAt()) {
 							opntg = opnmt.group(1);
@@ -2003,7 +2127,9 @@ public class TemplateEngine {
 										tgt1.length() - clstg.length());
 							}
 						}
+						logger.trace("cacheParsedTemplate opnpt end: " + sKey);
 
+						logger.trace("cacheParsedTemplate tppt2 start: " + sKey);
 						tpmt2 = tppt2.matcher(tgt2);
 						if(tpmt2.matches()) {
 							String args = tpmt2.group(3);
@@ -2033,8 +2159,10 @@ public class TemplateEngine {
 								}
 							}
 						}
+						logger.trace("cacheParsedTemplate tppt2 end: " + sKey);
 					}
 				}
+				logger.trace("cacheParsedTemplate tppt1 end: " + sKey);
 
 				if(isMatched) {
 					if(args2.length() > 0 && magicPtrn != null) {
@@ -2050,6 +2178,7 @@ public class TemplateEngine {
 						}
 
 						// magic word展開
+						logger.trace("cacheParsedTemplate magicPtrn start: " + sKey);
 						Matcher mc2 = magicPtrn.matcher(args2);
 						StringBuffer sb2 = new StringBuffer();
 						boolean allMinion = false;
@@ -2105,6 +2234,7 @@ public class TemplateEngine {
 							}
 						}
 						mc2.appendTail(sb2);
+						logger.trace("cacheParsedTemplate magicPtrn end: " + sKey);
 
 						String tmpArg2 = sb2.toString();
 						args2 = tmpArg2;
@@ -2176,6 +2306,7 @@ public class TemplateEngine {
 				} else {
 					if(magicPtrn != null) {
 						// magic word展開
+						logger.trace("cacheParsedTemplate magicPtrn start: " + sKey);
 						Matcher mc = magicPtrn.matcher(line);
 						StringBuffer sb = new StringBuffer();
 						while(mc.find()) {
@@ -2213,6 +2344,7 @@ public class TemplateEngine {
 							}
 						}
 						mc.appendTail(sb);
+						logger.trace("cacheParsedTemplate magicPtrn end: " + sKey);
 						line = sb.toString();
 					}
 				}
@@ -2236,10 +2368,12 @@ public class TemplateEngine {
 
 		addDebugCacheTree(cache, indent, "created");
 
+		logger.trace("cacheParsedTemplate end: " + sKey);
 		return cache;
 	}
 
 	private void raiseMagicTower() {
+		logger.trace("raiseMagicTower start.");
 		// コンストラクタで最下層が作られる
 		currentFloor = new HashMap<>();
 
@@ -2260,7 +2394,9 @@ public class TemplateEngine {
 		magicTower.add(currentFloor);
 		copyToMagicFloor();
 
+		logger.trace("raiseMagicTower updateMagicPtrn start.");
 		magicPtrn = updateMagicPtrn();
+		logger.trace("raiseMagicTower updateMagicPtrn end.");
 		ptrnTower.add(magicPtrn);
 
 		if(isLogMagicTower) {
@@ -2277,15 +2413,17 @@ public class TemplateEngine {
 			logger.debug("magicWord: raised.");
 			logMagicWordValues();
 		}
+		logger.trace("raiseMagicTower end.");
 	}
 
 	public static void buildMagicFloorRecursive(GlobalData gbd, ResponseData rpd,
 			Object obj, Map<String, Method[]> gsMtdsMap, Map<String, Field> fldMap,
 			Map<Class<?>, Map<String, Method[]>> gsMtdsMapMap,
 			Map<Class<?>, Map<String, Field>> fldMapMap, String ns,
-			HashMap<String, ReferenceStructure> currentFloor, ResourceBundle rb, int depth) {
+			HashMap<String, ReferenceStructure> currentFloor, ResourceBundle rb,
+			int listDepth, int listLimit, int magicDepth) {
 		buildMagicFloorRecursive(gbd, rpd, obj, null, null, gsMtdsMap, fldMap, gsMtdsMapMap, fldMapMap,
-				ns, currentFloor, rb, depth);
+				ns, currentFloor, rb, listDepth, listLimit, magicDepth);
 	}
 
 	public static void buildMagicFloorRecursive(GlobalData gbd, ResponseData rpd,
@@ -2293,8 +2431,9 @@ public class TemplateEngine {
 			Map<String, Method[]> gsMtdsMap, Map<String, Field> fldMap,
 			Map<Class<?>, Map<String, Method[]>> gsMtdsMapMap,
 			Map<Class<?>, Map<String, Field>> fldMapMap, String ns,
-			HashMap<String, ReferenceStructure> currentFloor, ResourceBundle rb, int depth) {
-		if(depth > MAGIC_FLOORS_LIMIT) {
+			HashMap<String, ReferenceStructure> currentFloor, ResourceBundle rb,
+			int listDepth, int listLimit, int magicDepth) {
+		if(magicDepth > MAGIC_FLOORS_LIMIT) {
 			logger.warn("depth exceeded.");
 			return;
 		}
@@ -2306,7 +2445,10 @@ public class TemplateEngine {
 			if(genType != null && BracketsNode.class.isAssignableFrom(genType)) {
 				// HtmlElement等のnodesは数が増えやすいので省略
 				return;
+			} else if(listDepth == listLimit) {
+				return;
 			}
+			listDepth++;
 
 			List<?> list = (List<?>)obj;
 			Class<?> cls = genType;
@@ -2352,9 +2494,14 @@ public class TemplateEngine {
 								suf = ReferenceConverter.convCls2Suf(cls);
 							}
 
+							boolean found = false;
 							if(StringUtils.isEmpty(suf)) {
 								kc = My.constantize(kec);
 								ref = ReferenceConverter.genStructureAssortedType(val, null, cls, genCnvCls);
+								found = true;
+							} else if(suf.equals(Constants.MINION_SUFFIX)
+									&& !isToMinion(suf, gbd, obj, ns, listDepth, listLimit, magicDepth)) {
+								kc = null;
 							} else {
 								kc = My.constantize(kec + "." + suf);
 								if(List.class.isAssignableFrom(cls)) {
@@ -2368,16 +2515,15 @@ public class TemplateEngine {
 								} else {
 									ref = ReferenceConverter.genStructureAssortedType(val, suf, cls);
 								}
+								found = true;
 								buildMagicFloorRecursive(gbd, rpd, val, null, null, gsMtdsMapMap, fldMapMap,
-										kec + ".", currentFloor, rb, depth + 1);
+										kec + ".", currentFloor, rb, listDepth, listLimit, magicDepth + 1);
 							}
-							currentFloor.put(kc, ref);
-							if(isLogAllMagicWords) {
-								logger.debug("magic word: \"" + kc + "\"=" + ref.getMnn());
-							}
-							if(kc.equals("REVIEW_ACTION__AGENT__PERSON_LIST__1__NAME__TEXT")) {
-								// ToDo: 検索画面で空なのに値が入る現象のデバッグ
-								logger.debug("reviewAction: " + ref.getMnn());
+							if(found) {
+								currentFloor.put(kc, ref);
+								if(isLogAllMagicWords) {
+									logger.debug("magic word: \"" + kc + "\"=" + ref.getMnn());
+								}
 							}
 						}
 					} else {
@@ -2432,9 +2578,15 @@ public class TemplateEngine {
 					}
 					String suf = ReferenceConverter.convCls2Suf(cls);
 					ReferenceStructure ref;
+					boolean found = false;
 					if(StringUtils.isEmpty(suf)) {
 						kc = My.constantize(kec);
 						ref = ReferenceConverter.genStructureAssortedType(val, null, cls);
+						found = true;
+					} else if(suf.equals(Constants.MINION_SUFFIX)
+							&& !isToMinion(suf, gbd, obj, ns, listDepth, listLimit, magicDepth)) {
+						kc = null;
+						ref = null;
 					} else {
 						kc = My.constantize(kec + "." + suf);
 						if(List.class.isAssignableFrom(cls)) {
@@ -2448,17 +2600,15 @@ public class TemplateEngine {
 						} else {
 							ref = ReferenceConverter.genStructureAssortedType(val, suf, cls);
 						}
+						found = true;
 						buildMagicFloorRecursive(gbd, rpd, val, null, null, gsMtdsMapMap, fldMapMap,
-								kec + ".", currentFloor, rb, depth + 1);
+								kec + ".", currentFloor, rb, listDepth, listLimit, magicDepth + 1);
 					}
-					currentFloor.put(kc, ref);
-					if(isLogAllMagicWords) {
-						logger.debug("magic word: \"" + kc + "\"=" + ref.getMnn());
-					}
-					if(kc.equals("REVIEW_ACTION__AGENT__PERSON_LIST__1__NAME__TEXT")) {
-						// ToDo: 検索画面で空なのに値が入る現象のデバッグ
-						// ToDo: 4/13の構造変更で直らないか
-						logger.debug("reviewAction: " + ref.getMnn());
+					if(found) {
+						currentFloor.put(kc, ref);
+						if(isLogAllMagicWords) {
+							logger.debug("magic word: \"" + kc + "\"=" + ref.getMnn());
+						}
 					}
 				}
 			}
@@ -2534,9 +2684,16 @@ public class TemplateEngine {
 								if(psp != null) {
 									cnvCls = psp.getConversionClass();
 								}
+
+								boolean found = false;
 								if(StringUtils.isEmpty(suf)) {
 									kc = My.constantize(kpc);
 									ref = ReferenceConverter.genStructureAssortedType(val, null, cls, cnvCls);
+									found = true;
+								} else if(suf.equals(Constants.MINION_SUFFIX)
+										&& !isToMinion(suf, gbd, obj, ns, listDepth, listLimit, magicDepth)) {
+									kc = null;
+									ref = null;
 								} else {
 									kc = My.constantize(kpc + "." + suf);
 									if(List.class.isAssignableFrom(cls)) {
@@ -2547,21 +2704,22 @@ public class TemplateEngine {
 											Object val2 = list2.get(0);
 											ref = ReferenceConverter.genStructureAssortedType(list2, suf, val2.getClass(), cnvCls);
 										}
+										found = true;
 										buildMagicFloorRecursive(gbd, rpd, val, aClass, psp, null, null,
-												gsMtdsMapMap, fldMapMap, kpc + ".", currentFloor, rb, depth + 1);
+												gsMtdsMapMap, fldMapMap, kpc + ".", currentFloor, rb,
+												listDepth, listLimit, magicDepth + 1);
 									} else {
 										ref = ReferenceConverter.genStructureAssortedType(val, suf, cls);
+										found = true;
 										buildMagicFloorRecursive(gbd, rpd, val, null, null, gsMtdsMapMap, fldMapMap,
-												kpc + ".", currentFloor, rb, depth + 1);
+												kpc + ".", currentFloor, rb, listDepth, listLimit, magicDepth + 1);
 									}
 								}
-								currentFloor.put(kc, ref);
-								if(isLogAllMagicWords) {
-									logger.debug("magic word: \"" + kc + "\"=" + ref.getMnn());
-								}
-								if(kc.equals("REVIEW_ACTION__AGENT__PERSON_LIST__1__NAME__TEXT")) {
-									// ToDo: 検索画面で空なのに値が入る現象のデバッグ
-									logger.debug("reviewAction: " + ref.getMnn());
+								if(found) {
+									currentFloor.put(kc, ref);
+									if(isLogAllMagicWords) {
+										logger.debug("magic word: \"" + kc + "\"=" + ref.getMnn());
+									}
 								}
 							}
 						} else {
@@ -2640,9 +2798,16 @@ public class TemplateEngine {
 							if(psp != null) {
 								cnvCls = psp.getConversionClass();
 							}
+
+							boolean found = false;
 							if(StringUtils.isEmpty(suf)) {
 								kc = My.constantize(kcm);
 								ref = ReferenceConverter.genStructureAssortedType(val, null, cls, cnvCls);
+								found = true;
+							} else if(suf.equals(Constants.MINION_SUFFIX)
+									&& !isToMinion(suf, gbd, obj, ns, listDepth, listLimit, magicDepth)) {
+								kc = null;
+								ref = null;
 							} else {
 								kc = My.constantize(kcm + "." + suf);
 								if(List.class.isAssignableFrom(cls)) {
@@ -2653,21 +2818,22 @@ public class TemplateEngine {
 										Object val2 = list2.get(0);
 										ref = ReferenceConverter.genStructureAssortedType(list2, suf, val2.getClass(), cnvCls);
 									}
+									found = true;
 									buildMagicFloorRecursive(gbd, rpd, val, aClass, psp, null, null,
-											gsMtdsMapMap, fldMapMap, kcm + ".", currentFloor, rb, depth + 1);
+											gsMtdsMapMap, fldMapMap, kcm + ".", currentFloor, rb,
+											listDepth, listLimit, magicDepth + 1);
 								} else {
 									ref = ReferenceConverter.genStructureAssortedType(val, suf, cls);
+									found = true;
 									buildMagicFloorRecursive(gbd, rpd, val, null, null, gsMtdsMapMap, fldMapMap,
-											kcm + ".", currentFloor, rb, depth + 1);
+											kcm + ".", currentFloor, rb, listDepth, listLimit, magicDepth + 1);
 								}
 							}
-							currentFloor.put(kc, ref);
-							if(isLogAllMagicWords) {
-								logger.debug("magic word: \"" + kc + "\"=" + ref.getMnn());
-							}
-							if(kc.equals("REVIEW_ACTION__AGENT__PERSON_LIST__1__NAME__TEXT")) {
-								// ToDo: 検索画面で空なのに値が入る現象のデバッグ
-								logger.debug("reviewAction: " + ref.getMnn());
+							if(found) {
+								currentFloor.put(kc, ref);
+								if(isLogAllMagicWords) {
+									logger.debug("magic word: \"" + kc + "\"=" + ref.getMnn());
+								}
 							}
 						}
 					} else {
@@ -2705,6 +2871,17 @@ public class TemplateEngine {
 				logger.error(ite.getMessage(), ite);
 			}
 		}
+	}
+
+	private static boolean isToMinion(String suf, GlobalData gbd, Object obj,
+			String ns, int listDepth, int listLimit, int magicDepth) {
+		if(magicDepth >= minionDepthLimit) {
+			return false;
+		} else if(isToMinionSchemaOrgProperty && obj instanceof SchemaOrgProperty) {
+			return false;
+		}
+
+		return true;
 	}
 
 	private Pattern updateMagicPtrn() {

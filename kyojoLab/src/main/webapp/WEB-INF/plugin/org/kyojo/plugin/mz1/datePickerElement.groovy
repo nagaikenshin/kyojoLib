@@ -1,8 +1,8 @@
 package org.kyojo.plugin.mz1
 
-class DatePickerElement extends InputTextElement {
+class DatepickerElement extends InputTextElement {
 
-	DatePickerElement() {
+	DatepickerElement() {
 		setDefaultClass("datepicker validate")
 	}
 

@@ -13,6 +13,10 @@ class OptionElement extends FormElement {
 		this("" + value)
 	}
 
+	OptionElement(Long value) {
+		this("" + value)
+	}
+
 	OptionElement(String value, String text) {
 		this.attrs = [ value : value ]
 		this.text = text
@@ -22,11 +26,19 @@ class OptionElement extends FormElement {
 		this("" + value, text)
 	}
 
+	OptionElement(Long value, String text) {
+		this("" + value, text)
+	}
+
 	OptionElement(String value, Integer text) {
 		this(value, "" + text)
 	}
 
 	OptionElement(Integer value, Integer text) {
+		this("" + value, "" + text)
+	}
+
+	OptionElement(Long value, Integer text) {
 		this("" + value, "" + text)
 	}
 

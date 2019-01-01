@@ -62,7 +62,9 @@ public final class SessionData implements Map<String, Object> {
 		}
 		if(ssn == null) {
 			IOLayer ioLayer = gbd.get(IOLayer.class);
+			logger.trace("getSession start.");
 			ssn = ioLayer.getSession(true, req);
+			logger.trace("getSession end.");
 		}
 
 		String sid0 = ssn.getId();
@@ -74,9 +76,12 @@ public final class SessionData implements Map<String, Object> {
 	public int size() {
 		if(ssn == null) {
 			IOLayer ioLayer = gbd.get(IOLayer.class);
+			logger.trace("getSession start.");
 			ssn = ioLayer.getSession(true, req);
+			logger.trace("getSession end.");
 		}
 
+		logger.trace("ssd size start.");
 		Enumeration<String> keys = ssn.getAttributeNames();
 		int size = 0;
 		while(keys.hasMoreElements()) {
@@ -85,6 +90,7 @@ public final class SessionData implements Map<String, Object> {
 				size++;
 			}
 		}
+		logger.trace("ssd size end.");
 
 		return size;
 	}
@@ -108,20 +114,29 @@ public final class SessionData implements Map<String, Object> {
 	public Object get(Object key) {
 		if(ssn == null) {
 			IOLayer ioLayer = gbd.get(IOLayer.class);
+			logger.trace("getSession start.");
 			ssn = ioLayer.getSession(true, req);
+			logger.trace("getSession end.");
 		}
 
-		return ssn.getAttribute(SESSION_DATA_KEY_PREFIX + key);
+		logger.trace("ssd get start: " + key);
+		Object obj = ssn.getAttribute(SESSION_DATA_KEY_PREFIX + key);
+		logger.trace("ssd get end: " + key);
+		return obj;
 	}
 
 	@Override
 	public Object put(String key, Object val) {
 		if(ssn == null) {
 			IOLayer ioLayer = gbd.get(IOLayer.class);
+			logger.trace("getSession start.");
 			ssn = ioLayer.getSession(true, req);
+			logger.trace("getSession end.");
 		}
 
+		logger.trace("ssd put start: " + key);
 		ssn.setAttribute(SESSION_DATA_KEY_PREFIX + key, val);
+		logger.trace("ssd put end: " + key);
 		return val;
 	}
 
@@ -129,11 +144,15 @@ public final class SessionData implements Map<String, Object> {
 	public Object remove(Object key) {
 		if(ssn == null) {
 			IOLayer ioLayer = gbd.get(IOLayer.class);
+			logger.trace("getSession start.");
 			ssn = ioLayer.getSession(true, req);
+			logger.trace("getSession end.");
 		}
 
 		Object val = get(key);
+		logger.trace("ssd remove start: " + key);
 		ssn.removeAttribute(SESSION_DATA_KEY_PREFIX + key);
+		logger.trace("ssd remove end: " + key);
 		return val;
 	}
 
@@ -148,7 +167,9 @@ public final class SessionData implements Map<String, Object> {
 	public void clear() {
 		if(ssn == null) {
 			IOLayer ioLayer = gbd.get(IOLayer.class);
+			logger.trace("getSession start.");
 			ssn = ioLayer.getSession(true, req);
+			logger.trace("getSession end.");
 		}
 
 		Enumeration<String> keys = ssn.getAttributeNames();
@@ -160,19 +181,25 @@ public final class SessionData implements Map<String, Object> {
 			}
 		}
 
+		logger.trace("ssd clear start.");
 		for(String rmvKey : rmvKeys) {
 			ssn.removeAttribute(rmvKey);
 		}
+		logger.trace("ssd clear end.");
 	}
 
 	@Override
 	public Set<String> keySet() {
 		if(ssn == null) {
 			IOLayer ioLayer = gbd.get(IOLayer.class);
+			logger.trace("getSession start.");
 			ssn = ioLayer.getSession(true, req);
+			logger.trace("getSession end.");
 		}
 
+		logger.trace("ssd keySet start.");
 		Enumeration<String> keys = ssn.getAttributeNames();
+		logger.trace("ssd keySet end.");
 		Set<String> keySet = new HashSet<>();
 		while(keys.hasMoreElements()) {
 			String key = keys.nextElement();
@@ -188,9 +215,12 @@ public final class SessionData implements Map<String, Object> {
 	public Collection<Object> values() {
 		if(ssn == null) {
 			IOLayer ioLayer = gbd.get(IOLayer.class);
+			logger.trace("getSession start.");
 			ssn = ioLayer.getSession(true, req);
+			logger.trace("getSession end.");
 		}
 
+		logger.trace("ssd values start.");
 		Enumeration<String> keys = ssn.getAttributeNames();
 		Set<Object> values = new HashSet<>();
 		while(keys.hasMoreElements()) {
@@ -199,6 +229,7 @@ public final class SessionData implements Map<String, Object> {
 				values.add(ssn.getAttribute(key));
 			}
 		}
+		logger.trace("ssd values end.");
 
 		return values;
 	}
@@ -207,9 +238,12 @@ public final class SessionData implements Map<String, Object> {
 	public Set<Map.Entry<String, Object>> entrySet() {
 		if(ssn == null) {
 			IOLayer ioLayer = gbd.get(IOLayer.class);
+			logger.trace("getSession start.");
 			ssn = ioLayer.getSession(true, req);
+			logger.trace("getSession end.");
 		}
 
+		logger.trace("ssd entrySet start.");
 		Enumeration<String> keys = ssn.getAttributeNames();
 		Map<String, Object> map = new HashMap<>();
 		while(keys.hasMoreElements()) {
@@ -218,6 +252,7 @@ public final class SessionData implements Map<String, Object> {
 				map.put(key.substring(SESSION_DATA_KEY_PREFIX.length()), ssn.getAttribute(key));
 			}
 		}
+		logger.trace("ssd entrySet end.");
 
 		return map.entrySet();
 	}

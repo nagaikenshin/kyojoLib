@@ -3,7 +3,7 @@
 <Configuration status="WARN">
 	<Appenders>
 		<Console name="console" target="SYSTEM_OUT" ignoreExceptions="false">
-			<PatternLayout pattern="%d{yyy/MM/dd HH:mm:ss.SSS} %-5level [%c.%M:%L] %msg%n%ex" />
+			<PatternLayout pattern="%d{yyy/MM/dd HH:mm:ss.SSS} [%t] %-5level [%c.%M:%L] %msg%n%ex" />
 		</Console>
 	</Appenders>
 

@@ -9,6 +9,8 @@ import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
 import org.apache.commons.lang3.StringUtils
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 import org.kyojo.core.Cache
 import org.kyojo.core.CompleteThrowable
 import org.kyojo.core.GlobalData
@@ -39,6 +41,8 @@ import org.kyojo.schemaorg.m3n4.core.DataType
 
 class JsonBlock {
 
+	private static final Log logger = LogFactory.getLog(JsonBlock.class)
+
 	String jsonLd
 	HtmlNode jsonRoot
 
@@ -51,6 +55,7 @@ class JsonBlock {
 		if(StringUtils.isBlank(jsonLd)) {
 		} else if(jsonLd.length() > 50000) {
 		} else {
+			logger.info(jsonLd);
 			Map<String, String> jsonLdRootMap = new HashMap<>()
 			Map<String, JsonLdThingStringGiven> thingStrModeMap = null
 			thingStrModeMap = new HashMap<>()
@@ -61,6 +66,7 @@ class JsonBlock {
 			thingStrModeMap.put("actionPlatform", JsonLdThingStringGiven.AS_URL)
 			String json = SimpleJsonWalker.jsonLdToJson("{\"item\":" + jsonLd + "}", jsonLdRootMap,
 					thingStrModeMap, JsonLdAtIdStringGiven.AS_AUTO)
+			logger.info(json);
 			ListItem obj = My.deminion(json, ListItem.class)
 			UlElement rootItemUl = jsonObjectToHtmlUl(obj.item, Item.class)
 			if(rootItemUl != null && rootItemUl.nodes.size() > 0

@@ -4,9 +4,9 @@ kyojo-library - The web framework make progress again.
 Overview
 --------
 
-kyojo-library is a web framework on Java Servlet. kyojo-core is the main compact jar, and the standard templates are provided. The template render a web page or a part of the page, also only provide the process without rendering. The templates consists of plugins written by Groovy and skins written in HTML.
+kyojo-library is a web framework on Java Servlet. kyojo-core is the main compact jar, and the standard templates are provided. The template renders a web page or a part of the page, also only provides a certain process without rendering. The templates consist of plugins written by Groovy and skins written in HTML.
 
-This framework intend to support some remarkable features progressed in the web recent years naturally. Such as HTML5, responsive design, structured data, AJAX and cloud servers clustering.
+This framework intends to support some remarkable features progressed in the web recent years naturally. Such as HTML5, responsive design, structured data, AJAX and cloud servers clustering.
 
 
 Demo application

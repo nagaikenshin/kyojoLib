@@ -25,8 +25,13 @@ abstract class FormComponent extends org.kyojo.plugin.html5.FormComponent {
 	HtmlElement validTooltip
 	HtmlElement invalidTooltip
 
-	void giveDescDefaults() {
-		super.giveDescDefaults()
+	void giveDescDefaults(String args,
+			GlobalData gbd, SessionData ssd, RequestData rqd, ResponseData rpd,
+			TemplateEngine te) throws PluginException {
+		String vldMsg = giveValidateMessage(args, gbd, ssd, rqd, rpd, te)
+		if(vldMsg != null && invalidFeedback == null) {
+			invalidFeedback = new DivElement.Builder().setText(vldMsg).build()
+		}
 
 		if(attrs != null && attrs.containsKey("id") && StringUtils.isNotBlank(attrs.id)) {
 			if(ariaDescribedBy != null) {
@@ -85,6 +90,12 @@ abstract class FormComponent extends org.kyojo.plugin.html5.FormComponent {
 					invalid.attrs = [:]
 				}
 				invalid.attrs["class"] = "invalid-tooltip"
+			}
+		}
+
+		if(desc != null) {
+			if(StringUtils.isBlank(desc.name) || desc.name == desc.rootName) {
+				desc.name = "small"
 			}
 		}
 

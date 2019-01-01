@@ -62,18 +62,38 @@ abstract class FormComponent {
 		}
 	}
 
+	String giveValidateMessage(String args,
+			GlobalData gbd, SessionData ssd, RequestData rqd, ResponseData rpd,
+			TemplateEngine te) {
+		if(form.attrs != null && form.attrs.containsKey("id")
+				&& StringUtils.isNotBlank(form.attrs.id)) {
+			String[] elems = form.attrs.id.split("\\.")
+			for(int ei1 = elems.length - 1; ei1 >= 0; ei1--) {
+				StringBuilder sb = new StringBuilder(elems[0])
+				for(int ei2 = 1; ei2 <= ei1; ei2++) {
+					sb << "." << elems[ei2]
+				}
+
+				String aid = sb.toString() + Constants.VLD_MSG_KEY_SUFFIX
+				String mwk = My.constantize(aid)
+				String mwv = te.convMagicWord(mwk)
+				if(StringUtils.isNotBlank(mwv)) {
+					return mwv
+				}
+			}
+		}
+
+		return null
+	}
+
 	void giveDescDefaults(String args,
 			GlobalData gbd, SessionData ssd, RequestData rqd, ResponseData rpd,
 			TemplateEngine te) throws PluginException {
-		if(form.attrs != null && form.attrs.containsKey("id")) {
-			String aid = form.attrs.id + Constants.VLD_MSG_KEY_SUFFIX
-			String mwk = My.constantize(aid)
-			String mwv = te.convMagicWord(mwk)
-			if(StringUtils.isNotBlank(mwv)) {
-				desc = new SmallElement()
-				desc.defaultClass = "vldMsg"
-				desc.text = mwv
-			}
+		String vldMsg = giveValidateMessage(args, gbd, ssd, rqd, rpd, te)
+		if(vldMsg != null) {
+			desc = new SmallElement()
+			desc.defaultClass = "vldMsg"
+			desc.text = vldMsg
 		}
 
 		if(desc != null) {

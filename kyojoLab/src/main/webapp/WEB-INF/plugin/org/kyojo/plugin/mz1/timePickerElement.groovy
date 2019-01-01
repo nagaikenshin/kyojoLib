@@ -1,8 +1,8 @@
 package org.kyojo.plugin.mz1
 
-class TimePickerElement extends InputTextElement {
+class TimepickerElement extends InputTextElement {
 
-	TimePickerElement() {
+	TimepickerElement() {
 		setDefaultClass("timepicker validate")
 	}
 
